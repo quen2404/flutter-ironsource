@@ -1,0 +1,29 @@
+PODS:
+  - Flutter (1.0.0)
+  - IronSourceSDK (7.0.3.0)
+  - url_launcher (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - IronSourceSDK (= 7.0.3.0)
+  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
+
+SPEC REPOS:
+  trunk:
+    - IronSourceSDK
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  url_launcher:
+    :path: ".symlinks/plugins/url_launcher/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  IronSourceSDK: 9787d1c3e1d93a03d59edce53eb1f8063f5889b7
+  url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
+
+PODFILE CHECKSUM: 90e247c999d748a3b943d750728f23656a0e63d7
+
+COCOAPODS: 1.10.0

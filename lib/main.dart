@@ -51,26 +51,46 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const interstitial = const MethodChannel('ironsource.tombolapp.net/interstitial');
-  static const interstitialEvents = const EventChannel('ironsource.tombolapp.net/interstitial/events');
+  static const interstitial =
+      const MethodChannel('ironsource.tombolapp.net/interstitial');
+  static const interstitialEvents =
+      const EventChannel('ironsource.tombolapp.net/interstitialEvents');
+  static const rewardedVideo =
+      const MethodChannel('ironsource.tombolapp.net/rewardedVideo');
+  static const rewardedVideoEvents =
+      const EventChannel('ironsource.tombolapp.net/rewardedVideoEvents');
 
   // Get battery level.
-  String _batteryLevel = 'Unknown battery level.';
+  String rewardedVideoState = 'None';
+  String interstitialState = 'None';
 
-  Future<void> _getBatteryLevel() async {
-    String batteryLevel;
+  Future<void> showRewardedVideo() async {
+    String state;
     try {
-      final int result = await interstitial.invokeMethod('loadInterstitial');
-      batteryLevel = 'Battery level at $result % .';
+      final void result = await rewardedVideo.invokeMethod('showRewardedVideo');
+      state = 'Showing...';
     } on PlatformException catch (e) {
-      batteryLevel = "Failed to get battery level: '${e.message}'.";
+      state = "Failed to show rewareded video: '${e.message}'.";
     }
 
     setState(() {
-      _batteryLevel = batteryLevel;
+      rewardedVideoState = state;
     });
   }
 
+  Future<void> showInterstitial() async {
+    String state;
+    try {
+      final void result = await interstitial.invokeMethod('loadInterstitial');
+      state = 'Loading interstitial';
+    } on PlatformException catch (e) {
+      state = "Failed to load interstitial: '${e.message}'.";
+    }
+
+    setState(() {
+      interstitialState = state;
+    });
+  }
 
   int _counter = 0;
 
@@ -82,6 +102,52 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    rewardedVideoEvents
+        .receiveBroadcastStream()
+        .listen(_onRewardedVideoEvent, onError: _onRewardedVideoError);
+    interstitialEvents
+        .receiveBroadcastStream()
+        .listen(_onInterstitialEvent, onError: _onInterstitialError);
+  }
+
+  void _onRewardedVideoEvent(Object event) {
+    setState(() {
+      rewardedVideoState += ", $event";
+    });
+  }
+
+  void _onRewardedVideoError(Object error) {
+    setState(() {
+      rewardedVideoState = ", Error: $error";
+    });
+  }
+
+  void _onInterstitialEvent(Object event) {
+    if (event == "loaded") {
+      interstitial
+          .invokeMethod('showInterstitial')
+          .then((result) => setState(() {
+                interstitialState += ', Showing...';
+              }))
+          .catchError((e) => setState(() {
+                interstitialState +=
+                    ", Failed to show interstitial: '${e.message}'.";
+              }));
+    }
+    setState(() {
+      interstitialState += ", $event";
+    });
+  }
+
+  void _onInterstitialError(Object error) {
+    setState(() {
+      interstitialState = ", Error: $error";
     });
   }
 
@@ -127,10 +193,15 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headline4,
             ),
             ElevatedButton(
-              child: Text('Get Battery Level'),
-              onPressed: _getBatteryLevel,
+              child: Text('Show rewardedVideo'),
+              onPressed: showRewardedVideo,
             ),
-            Text(_batteryLevel)
+            Text(rewardedVideoState),
+            ElevatedButton(
+              child: Text('Show interstitial'),
+              onPressed: showInterstitial,
+            ),
+            Text(interstitialState),
           ],
         ),
       ),
