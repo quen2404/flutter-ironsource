@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(MyApp());
@@ -50,6 +51,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  static const interstitial = const MethodChannel('ironsource.tombolapp.net/interstitial');
+  static const interstitialEvents = const EventChannel('ironsource.tombolapp.net/interstitial/events');
+
+  // Get battery level.
+  String _batteryLevel = 'Unknown battery level.';
+
+  Future<void> _getBatteryLevel() async {
+    String batteryLevel;
+    try {
+      final int result = await interstitial.invokeMethod('loadInterstitial');
+      batteryLevel = 'Battery level at $result % .';
+    } on PlatformException catch (e) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
+    }
+
+    setState(() {
+      _batteryLevel = batteryLevel;
+    });
+  }
+
+
   int _counter = 0;
 
   void _incrementCounter() {
@@ -104,6 +126,11 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            ElevatedButton(
+              child: Text('Get Battery Level'),
+              onPressed: _getBatteryLevel,
+            ),
+            Text(_batteryLevel)
           ],
         ),
       ),
